@@ -52,6 +52,14 @@ public class Car {
         this.year = year;
     }
 
+    public int getId() {
+        return id;
+    }
+
+    public void setId(int id) {
+        this.id = id;
+    }
+
     public String getCapacity() {
         return capacity;
     }
@@ -95,7 +103,7 @@ public class Car {
     }
 
     public String toSql(){
-        return id + "'" + name + "'" + ", " + "'" + year + "'" + ", " + "'" + capacity + "'" + ", "
+        return id + ", " + "'" + name + "'" + ", " + "'" + year + "'" + ", " + "'" + capacity + "'" + ", "
                 + "'" + km + "'" + ", " + "'" + gearbox + "'" + ", " + price;
     }
 

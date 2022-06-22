@@ -1,3 +1,8 @@
+import com.opencsv.CSVReader;
+import com.opencsv.CSVReaderBuilder;
+import com.opencsv.CSVWriter;
+import com.opencsv.bean.CsvToBean;
+import com.opencsv.bean.CsvToBeanBuilder;
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
@@ -38,6 +43,7 @@ public class Main {
             String capacity = e.getElementsByClass("ads-list-table-col-4 feature-103").text();
             String km = e.getElementsByClass("ads-list-table-col-4 feature-104").text();
             if (capacity.isEmpty() || km.isEmpty()) continue;
+            km = km.replace("mi", "km");
 
             Elements columns = e.select("td");
             for (Element child : columns) {
@@ -54,7 +60,6 @@ public class Main {
             count++;
             id++;
             cars.add( new Car(id, name, year, capacity, km, gearbox, intPrice));
-
         }
 
         if (count != 0)
@@ -74,21 +79,38 @@ public class Main {
     }
 
     public void CsvToSql(String tableName, String path) throws IOException {
-        Connection connection;
-        Statement stmt;
 
         try {
+
             Class.forName("org.postgresql.Driver");
-            connection = DriverManager
+            Connection connection = DriverManager
                     .getConnection("jdbc:postgresql://localhost:5432/postgres",
                             "postgres", "olanesti905");
             connection.setAutoCommit(false);
             System.out.println("Opened database successfully");
 
-            stmt = connection.createStatement();
+            Statement stmt = connection.createStatement();
 
-            String sql = "COPY " + tableName + " FROM 'C:\\" + path + "' " + " DELIMITER ',' CSV HEADER;";
-            stmt.executeUpdate(sql);
+            CsvToBeanBuilder<Car> beanBuilder = new CsvToBeanBuilder<>(new InputStreamReader(new FileInputStream("C:\\" + path)));
+            beanBuilder.withType(Car.class);
+            List<Car> cars = beanBuilder.build().parse();
+
+            for (Car i : cars) {
+                String rawKm = i.getKm().replaceAll("[^0-9]", "");
+                int km = Integer.parseInt(rawKm);
+                char grade;
+
+                if (km < 100000)
+                    grade = 'A';
+                else
+                if (km < 150000)
+                    grade = 'B';
+                else
+                    grade = 'C';
+
+                stmt.executeUpdate("INSERT INTO " + tableName + " VALUES (" + i.toSql() + ", " + "'" + grade + "'" + ");");
+            }
+
             stmt.close();
             connection.commit();
             connection.close();
@@ -125,12 +147,10 @@ public class Main {
 
         Main main = new Main();
         ArrayList<Car> cars = new ArrayList<>();
-        List<String[]> allCars;
-
 
 //        cars = main.readCars(1, cars, 0);
 //        main.CsvWrite(cars, "cars.csv");
-        main.CsvToSql("carsV2" ,"carsV2.csv");
+        main.CsvToSql("cars" ,"cars.csv");
 
 //        main.maxMinAvgCar(cars);
     }
