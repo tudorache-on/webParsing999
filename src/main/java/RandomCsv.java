@@ -1,33 +1,14 @@
 import com.opencsv.CSVWriter;
-import org.apache.commons.lang3.RandomStringUtils;
 import org.apache.commons.lang3.RandomUtils;
 
-import java.io.FileNotFoundException;
 import java.io.FileWriter;
 import java.io.IOException;
-import java.io.PrintWriter;
-import java.nio.charset.StandardCharsets;
-import java.util.ArrayList;
-import java.util.List;
+
 
 public class RandomCsv {
     public static void main(String[] args) {
-        //ArrayList<Car> cars = new ArrayList<>();
-
         int n = 20000000;
-
-
-
         try {
-//            PrintWriter writer = new PrintWriter("C:\\random.csv");
-//            writer.println("Id,Marca,Anul de productie,Capacitatea,Kilometraj,Cutia de viteza,Pret");
-//
-//            for (Car i : cars) {
-//                writer.println(i.toString());
-//            }
-//
-//            writer.close();
-
             CSVWriter writer = new CSVWriter( new FileWriter("C:\\random.csv") );
             writer.writeNext(new String[] {"Id", "Marca", "Anul de productie", "Capacitatea", "Kilometraj", "Cutia de viteza", "Pret"});
 
@@ -47,6 +28,5 @@ public class RandomCsv {
         }
 
     }
-
 
 }
