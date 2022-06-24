@@ -75,7 +75,7 @@ public class Main {
         writer.close();
     }
 
-    public void CsvToSql(String tableName, String path) throws IOException {
+    public void CsvToSql(String tableName, String path) {
 
         try {
 
@@ -108,40 +108,6 @@ public class Main {
                 stmt.executeUpdate("INSERT INTO " + tableName + " VALUES (" + car.toSql() + ", " + "'" + grade + "'" + ");");
             }
 
-//            beanBuilder.forEach(
-//                    x -> {
-//                        String rawKm = x.getKm().replaceAll("[^0-9]", "");
-//                        int km = Integer.parseInt(rawKm);
-//                        char grade;
-//
-//                        if (km < 100000)
-//                            grade = 'A';
-//                        else
-//                        if (km < 150000)
-//                            grade = 'B';
-//                        else
-//                            grade = 'C';
-//
-//                        try {
-//                        } catch (SQLException e) {
-//                            e.printStackTrace();
-//                        }
-//                    });
-//            for (Car i : cars) {
-//                String rawKm = i.getKm().replaceAll("[^0-9]", "");
-//                int km = Integer.parseInt(rawKm);
-//                char grade;
-//
-//                if (km < 100000)
-//                    grade = 'A';
-//                else
-//                if (km < 150000)
-//                    grade = 'B';
-//                else
-//                    grade = 'C';
-//
-//                stmt.executeUpdate("INSERT INTO " + tableName + " VALUES (" + i.toSql() + ", " + "'" + grade + "'" + ");");
-//            }
             stmt.close();
             connection.commit();
             connection.close();
