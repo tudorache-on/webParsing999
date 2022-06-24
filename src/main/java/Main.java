@@ -1,6 +1,3 @@
-import com.opencsv.CSVReader;
-import com.opencsv.CSVReaderBuilder;
-import com.opencsv.CSVWriter;
 import com.opencsv.bean.CsvToBean;
 import com.opencsv.bean.CsvToBeanBuilder;
 import org.jsoup.Jsoup;
@@ -91,12 +88,12 @@ public class Main {
 
             Statement stmt = connection.createStatement();
 
-            CsvToBeanBuilder<Car> beanBuilder = new CsvToBeanBuilder<>(new InputStreamReader(new FileInputStream("C:\\" + path)));
-            beanBuilder.withType(Car.class);
-            List<Car> cars = beanBuilder.build().parse();
+            CsvToBean<Car> bean = new CsvToBeanBuilder<Car>(new FileReader("C:\\" + path))
+                    .withType(Car.class)
+                    .build();
 
-            for (Car i : cars) {
-                String rawKm = i.getKm().replaceAll("[^0-9]", "");
+            for (Car car : bean) {
+                String rawKm = car.getKm().replaceAll("[^0-9]", "");
                 int km = Integer.parseInt(rawKm);
                 char grade;
 
@@ -108,9 +105,43 @@ public class Main {
                 else
                     grade = 'C';
 
-                stmt.executeUpdate("INSERT INTO " + tableName + " VALUES (" + i.toSql() + ", " + "'" + grade + "'" + ");");
+                stmt.executeUpdate("INSERT INTO " + tableName + " VALUES (" + car.toSql() + ", " + "'" + grade + "'" + ");");
             }
 
+//            beanBuilder.forEach(
+//                    x -> {
+//                        String rawKm = x.getKm().replaceAll("[^0-9]", "");
+//                        int km = Integer.parseInt(rawKm);
+//                        char grade;
+//
+//                        if (km < 100000)
+//                            grade = 'A';
+//                        else
+//                        if (km < 150000)
+//                            grade = 'B';
+//                        else
+//                            grade = 'C';
+//
+//                        try {
+//                        } catch (SQLException e) {
+//                            e.printStackTrace();
+//                        }
+//                    });
+//            for (Car i : cars) {
+//                String rawKm = i.getKm().replaceAll("[^0-9]", "");
+//                int km = Integer.parseInt(rawKm);
+//                char grade;
+//
+//                if (km < 100000)
+//                    grade = 'A';
+//                else
+//                if (km < 150000)
+//                    grade = 'B';
+//                else
+//                    grade = 'C';
+//
+//                stmt.executeUpdate("INSERT INTO " + tableName + " VALUES (" + i.toSql() + ", " + "'" + grade + "'" + ");");
+//            }
             stmt.close();
             connection.commit();
             connection.close();
@@ -150,7 +181,7 @@ public class Main {
 
 //        cars = main.readCars(1, cars, 0);
 //        main.CsvWrite(cars, "cars.csv");
-        main.CsvToSql("cars" ,"cars.csv");
+        main.CsvToSql("cars" ,"random.csv");
 
 //        main.maxMinAvgCar(cars);
     }
