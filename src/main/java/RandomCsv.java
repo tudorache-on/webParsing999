@@ -13,14 +13,11 @@ public class RandomCsv {
             writer.writeNext(new String[] {"Id", "Marca", "Anul de productie", "Capacitatea", "Kilometraj", "Cutia de viteza", "Pret"});
 
             for (int i = 1; i < n; i++) {
-                String name = "name";
                 String year = Integer.toString(RandomUtils.nextInt(1990, 2020));
-                String capacity = "capacity";
                 String km = RandomUtils.nextInt(1, 200000) + " km";
-                String gearbox = "aut.";
                 String price = Integer.toString(RandomUtils.nextInt(500, 20200));
 
-                writer.writeNext(new String[] { Integer.toString(i), name, year, capacity, km, gearbox, price });
+                writer.writeNext(new String[] { Integer.toString(i), "name", year, "capacity", km, "aut.", price });
             }
             writer.close();
         } catch (IOException e) {

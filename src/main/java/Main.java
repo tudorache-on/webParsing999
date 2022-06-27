@@ -1,17 +1,22 @@
+import com.opencsv.CSVWriter;
 import com.opencsv.bean.CsvToBean;
 import com.opencsv.bean.CsvToBeanBuilder;
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
 import org.jsoup.select.Elements;
+import org.postgresql.copy.CopyIn;
+import org.postgresql.copy.CopyManager;
+import org.postgresql.copy.PGCopyOutputStream;
+import org.postgresql.core.BaseConnection;
 
+
+import java.nio.charset.StandardCharsets;
 import java.sql.Connection;
 import java.sql.DriverManager;
 
 import java.io.*;
-import java.sql.Statement;
 import java.util.*;
-
 
 public class Main {
 
@@ -31,12 +36,14 @@ public class Main {
         Element table = doc.select(".ads-list-table").first();
         Elements rows = table.select("tr");
 
+        CSVWriter writer = new CSVWriter( new FileWriter("C:\\random.csv") );
+        writer.writeNext(new String[] {"Id", "Marca", "Anul de productie", "Capacitatea", "Kilometraj", "Cutia de viteza", "Pret"});
+
         for (Element e : rows) {
-            String name = e.select("a").text();
-            name = name.replace("\"", "").replace("'", "`");
+            String name = e.select("a").text().replace("\"", "").replace("'", "`");
             String year = e.getElementsByClass("ads-list-table-col-3 feature-19").text();
             String price = "negociabil";
-            int intPrice;
+            int intPrice = 0;
             String capacity = e.getElementsByClass("ads-list-table-col-4 feature-103").text();
             String km = e.getElementsByClass("ads-list-table-col-4 feature-104").text();
             if (capacity.isEmpty() || km.isEmpty()) continue;
@@ -45,13 +52,12 @@ public class Main {
             Elements columns = e.select("td");
             for (Element child : columns) {
                 if (child.hasClass(" ads-list-table-price feature-2  "))
-                    price = child.getElementsByClass(" ads-list-table-price feature-2  ").text();
+                    price = child.getElementsByClass(" ads-list-table-price feature-2  ").text().replaceAll("[^0-9]", "");
+                    intPrice = Integer.parseInt(price);
             }
+
             if (price.equals("negociabil")) continue;
-            else {
-                price = price.replaceAll("[^0-9]", "");
-                intPrice = Integer.parseInt(price);
-            }
+
             String gearbox = e.getElementsByClass("ads-list-table-col-2 feature-101").text();
 
             count++;
@@ -83,10 +89,12 @@ public class Main {
             Connection connection = DriverManager
                     .getConnection("jdbc:postgresql://localhost:5432/postgres",
                             "postgres", "olanesti905");
-            connection.setAutoCommit(false);
-            System.out.println("Opened database successfully");
 
-            Statement stmt = connection.createStatement();
+            connection.setAutoCommit(false);
+
+            CopyManager copyManager = new CopyManager((BaseConnection) connection);
+            CopyIn copyIn = copyManager.copyIn("COPY " + tableName + " FROM STDIN WITH CSV");
+            Writer writer = new OutputStreamWriter(new PGCopyOutputStream(copyIn), StandardCharsets.UTF_8);
 
             CsvToBean<Car> bean = new CsvToBeanBuilder<Car>(new FileReader("C:\\" + path))
                     .withType(Car.class)
@@ -105,10 +113,10 @@ public class Main {
                 else
                     grade = 'C';
 
-                stmt.executeUpdate("INSERT INTO " + tableName + " VALUES (" + car.toSql() + ", " + "'" + grade + "'" + ");");
+                writer.write(car + "," + grade + "\n");
             }
 
-            stmt.close();
+            writer.close();
             connection.commit();
             connection.close();
 
@@ -147,8 +155,7 @@ public class Main {
 
 //        cars = main.readCars(1, cars, 0);
 //        main.CsvWrite(cars, "cars.csv");
-        main.CsvToSql("cars" ,"random.csv");
-
+        main.CsvToSql("carsV2" ,"cars.csv");
 //        main.maxMinAvgCar(cars);
     }
 }
