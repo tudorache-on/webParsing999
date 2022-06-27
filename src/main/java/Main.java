@@ -28,7 +28,7 @@ public class Main {
 //        ArrayList<Car> cars = new ArrayList<>();
 
 //        cars = main.readCars(1, 0, cars, "cars.csv");
-//        main.CsvWrite(cars, "cars.csv");
+//        main.csvWrite(cars, "cars.csv");
 //        main.csvToSql("carsV2", "cars.csv");
 //        main.maxMinAvgCar(cars);
     }
